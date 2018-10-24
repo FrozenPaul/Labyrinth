@@ -9,19 +9,24 @@ public class Point {
         this.j = j;
     }
 
-    public int getI(){
+    @Override
+    public boolean equals(Object obj) {
+        Point point = (Point) obj;
+        if (i == point.getI() && j == point.getJ())
+            return true;
+        return false;
+    }
+
+    public int getI() {
         return i;
     }
 
-    public int getJ(){
+    public int getJ() {
         return j;
     }
 
-    public boolean isInList(List<Point> list){
-        for (int k = 0; k < list.size(); k++) {
-            if (i == list.get(k).getI() && j==list.get(k).getJ())
-                return true;
-        }
+    public boolean isInList(List<Point> list) {
+        if (list.contains(this)) return true;
         return false;
     }
 

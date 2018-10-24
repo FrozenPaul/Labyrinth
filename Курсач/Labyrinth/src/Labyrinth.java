@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class Labyrinth {
@@ -89,14 +88,8 @@ public class Labyrinth {
         }
 
         List<Point> points = CheckAllWays(start, way);
-        points.sort(new Comparator<Point>() {
-            @Override
-            public int compare(Point o1, Point o2) {
-                if (h(o1, End) < h(o2, End))
-                    return -1;
-                return 1;
-            }
-        });
+        points.sort((o1, o2) -> { if (h(o1, End) < h(o2, End)) return -1;return 1;});
+
         for (int i = 0; i < points.size(); i++) {
             if (Crosses.size() > 24) {
                 list.get(points.get(i).getI()).remove(points.get(i).getJ());
@@ -139,31 +132,23 @@ public class Labyrinth {
     }
 
     private boolean CheckUp(int i, int j) {
-        if (i - 1 < 0) return false;
-        if (!list.get(i - 1).get(j).equals('*') && i - 1 >= 0) {
-            return true;
-        } else return false;
+        return (i >= 1)
+                && (!list.get(i - 1).get(j).equals('*'));
     }
 
     private boolean CheckDown(int i, int j) {
-        if (i + 1 > list.size()) return false;
-        if (!list.get(i + 1).get(j).equals('*') && i + 1 < list.size()) {
-            return true;
-        } else return false;
+        return (i <= list.size() - 2)
+                && (!list.get(i + 1).get(j).equals('*'));
     }
 
     private boolean CheckLeft(int i, int j) {
-        if (j - 1 < 0) return false;
-        if (!list.get(i).get(j - 1).equals('*') && j - 1 >= 0) {
-            return true;
-        } else return false;
+        return (j >= 1)
+                && (!list.get(i).get(j - 1).equals('*'));
     }
 
     private boolean CheckRight(int i, int j) {
-        if (j + 1 > list.get(i).size()) return false;
-        if (!list.get(i).get(j + 1).equals('*') && j + 1 < list.get(i).size()) {
-            return true;
-        } else return false;
+        return (j <= list.get(i).size() - 2)
+                && (!list.get(i).get(j + 1).equals('*'));
     }
 
     private static boolean CheckPointInWay(Way way, Point point) {
@@ -179,7 +164,7 @@ public class Labyrinth {
         for (int i = 0; i < way.length; i++) {
             list.get(way.getList().get(i).getI()).remove(way.getList().get(i).getJ());
             String s = "" + k;
-            list.get(way.getList().get(i).getI()).add(way.getList().get(i).getJ(),s.charAt(0));
+            list.get(way.getList().get(i).getI()).add(way.getList().get(i).getJ(), s.charAt(0));
             k += ind;
             if (k == 9) ind = -1;
             if (k == 1) ind = 1;
