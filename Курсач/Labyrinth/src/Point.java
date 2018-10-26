@@ -12,9 +12,7 @@ public class Point {
     @Override
     public boolean equals(Object obj) {
         Point point = (Point) obj;
-        if (i == point.getI() && j == point.getJ())
-            return true;
-        return false;
+        return (i == point.getI()) && (j == point.getJ());
     }
 
     public int getI() {
@@ -26,8 +24,7 @@ public class Point {
     }
 
     public boolean isInList(List<Point> list) {
-        if (list.contains(this)) return true;
-        return false;
+        return (list.contains(this));
     }
 
     public void Show() {

@@ -28,8 +28,7 @@ public class Way {
     }
 
     public boolean isInWay(Point a) {
-        if (list.contains(a)) return true;
-        return false;
+        return (list.contains(a));
     }
 
     public void Show() {

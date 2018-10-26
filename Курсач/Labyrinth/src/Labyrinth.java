@@ -10,6 +10,7 @@ public class Labyrinth {
     private Point End;
     private List<Way> FullWays = new ArrayList<>();
     private List<Point> Crosses = new ArrayList<>();
+    private final int CrossesCount = 24;
 
     Labyrinth(String fileName) throws IOException {
         List<String> k = Files.readAllLines(Paths.get(fileName));
@@ -66,10 +67,11 @@ public class Labyrinth {
         Way bestWay = new Way();
         Obhod(Start, bestWay);
         bestWay = CheckMinimalWay();
-        if (Crosses.size() < 25) {
+        if (Crosses.size() > CrossesCount) System.out.println("Путь :");
+         else {
             System.out.println("Различных путей найдено :" + FullWays.size());
             System.out.println("Кратчайший путь :");
-        } else System.out.println("Путь :");
+        }
         bestWay.Show();
         fill1(bestWay);
         Show();
@@ -91,7 +93,7 @@ public class Labyrinth {
         points.sort((o1, o2) -> { if (h(o1, End) < h(o2, End)) return -1;return 1;});
 
         for (int i = 0; i < points.size(); i++) {
-            if (Crosses.size() > 24) {
+            if (Crosses.size() > CrossesCount) {
                 list.get(points.get(i).getI()).remove(points.get(i).getJ());
                 list.get(points.get(i).getI()).add(points.get(i).getJ(), '0');
             }
@@ -152,22 +154,13 @@ public class Labyrinth {
     }
 
     private static boolean CheckPointInWay(Way way, Point point) {
-        if (way.isInWay(point)) {
-            return true;
-        }
-        return false;
+        return (way.isInWay(point));
     }
 
     public void fill1(Way way) {
-        int k = 1;
-        int ind = 1;
         for (int i = 0; i < way.length; i++) {
             list.get(way.getList().get(i).getI()).remove(way.getList().get(i).getJ());
-            String s = "" + k;
-            list.get(way.getList().get(i).getI()).add(way.getList().get(i).getJ(), s.charAt(0));
-            k += ind;
-            if (k == 9) ind = -1;
-            if (k == 1) ind = 1;
+            list.get(way.getList().get(i).getI()).add(way.getList().get(i).getJ(), '1');
         }
     }
 
