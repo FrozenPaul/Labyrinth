@@ -52,26 +52,6 @@ public class Labyrinth {
         Show();
     }
 
-    private int Zapolnenie(List<Point> points, int i) {
-        if (i == 0) {
-            list.get(Start.getI()).remove(Start.getJ());
-            list.get(Start.getI()).add(Start.getJ(), "0");
-            i++;
-        }
-        List<Point> secondPoints = new ArrayList<>();
-        for (int j = 0; j < points.size(); j++) {
-            secondPoints.addAll(CheckAllPoints(points.get(j)));
-        }
-        for (int j = 0; j < secondPoints.size(); j++) {
-            list.get(secondPoints.get(j).getI()).remove(secondPoints.get(j).getJ());
-            list.get(secondPoints.get(j).getI()).add(secondPoints.get(j).getJ(), "" + i + "");
-        }
-        Show();
-        if (list.get(End.getI()).get(End.getJ()).equals(" "))
-            Zapolnenie(secondPoints, ++i);
-        return 1;
-    }
-
     public void Zapoln(List<Point> points, int i){
         while (list.get(End.getI()).get(End.getJ()).equals(" ")){
             if (i == 0) {
