@@ -7,6 +7,14 @@ public class Point {
         this.j = j;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        Point point = (Point) obj;
+        if (i == point.getI() && j == point.getJ())
+            return true;
+        return false;
+    }
+
     public int getI() {
         return i;
     }

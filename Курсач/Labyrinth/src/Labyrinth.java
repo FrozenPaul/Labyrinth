@@ -59,7 +59,11 @@ public class Labyrinth {
             }
             List<Point> secondPoints = new ArrayList<>();
             for (int j = 0; j < points.size(); j++) {
-                secondPoints.addAll(CheckAllPoints(points.get(j)));
+                List<Point> pointList = CheckAllPoints(points.get(j));
+                for (int k = 0; k < pointList.size(); k++) {
+                    if (!secondPoints.contains(pointList.get(k)))
+                        secondPoints.add(pointList.get(k));
+                }
             }
             for (int j = 0; j < secondPoints.size(); j++) {
                 list.get(secondPoints.get(j).getI()).remove(secondPoints.get(j).getJ());
@@ -98,7 +102,7 @@ public class Labyrinth {
         return point;
     }
 
-    public double h(Point a, Point b) {
+    private double h(Point a, Point b) {
         double length = Math.sqrt(Math.pow(b.getI() - a.getI(), 2) + Math.pow(b.getJ() - a.getJ(), 2));
         return length;
     }
