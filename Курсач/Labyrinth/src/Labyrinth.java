@@ -2,38 +2,35 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class Labyrinth {
-    private List<List<Character>> list = new ArrayList<>();
+    private List<List<String>> list = new ArrayList<>();
     private Point Start;
     private Point End;
-    private List<Way> FullWays = new ArrayList<>();
-    private List<Point> Crosses = new ArrayList<>();
+    private Point SpPoint;
 
     Labyrinth(String fileName) throws IOException {
         List<String> k = Files.readAllLines(Paths.get(fileName));
         for (int i = 0; i < k.size(); i++) {
             char[] s = k.get(i).toCharArray();
-            List<Character> l = new ArrayList<>();
+            List<String> l = new ArrayList<>();
             for (int j = 0; j < s.length; j++) {
-                l.add(s[j]);
+                l.add(String.valueOf(s[j]));
             }
             list.add(l);
         }
         Show();
         findingStartAndEnd();
-        findingCrossing();
     }
 
     private void findingStartAndEnd() {
         for (int i = 0; i < list.size(); i++) {
             for (int j = 0; j < list.get(i).size(); j++) {
                 if (i == 0 || j == 0 || i == list.size() - 1 || j == list.get(i).size() - 1)
-                    if (Start == null && list.get(i).get(j).equals(' ')) {
+                    if (Start == null && list.get(i).get(j).equals(" ")) {
                         Start = new Point(i, j);
-                    } else if (list.get(i).get(j).equals(' ')) {
+                    } else if (list.get(i).get(j).equals(" ")) {
                         End = new Point(i, j);
                     }
             }
@@ -42,162 +39,134 @@ public class Labyrinth {
         End.Show();
     }
 
-    private void findingCrossing() {
-        for (int i = 1; i < list.size() - 1; i++) {
-            for (int j = 1; j < list.get(i).size() - 1; j++) {
-                int k = 0;
-                if (!list.get(i).get(j).equals('*')) {
-                    if (CheckUp(i, j)) k++;
-                    if (CheckDown(i, j)) k++;
-                    if (CheckLeft(i, j)) k++;
-                    if (CheckRight(i, j)) k++;
-                    if (k >= 3) Crosses.add(new Point(i, j));
-                }
-            }
-        }
-        System.out.println("Перекрестки :");
-        for (int i = 0; i < Crosses.size(); i++) {
-            Crosses.get(i).Show();
-        }
-        System.out.println("Кол-во перекрестков = " + Crosses.size());
-        ShowCrossings();
-    }
-
     public void findAWayOut() {
-        Way bestWay = new Way();
-        Obhod(Start, bestWay);
-        bestWay = CheckMinimalWay();
-        if (Crosses.size() < 25) {
-            System.out.println("Различных путей найдено :" + FullWays.size());
-            System.out.println("Кратчайший путь :");
-        } else System.out.println("Путь :");
+        List<Point> points = new ArrayList<>();
+        points.add(Start);
+//        Zapolnenie(points, 0);
+        Zapoln(points,0);
+        Show();
+        Way bestWay = wayReconstruction();
+        System.out.println("Кратчайший путь :");
         bestWay.Show();
         fill1(bestWay);
         Show();
     }
 
-    public double h(Point a, Point end) {
-        double length = Math.sqrt(Math.pow(end.getI() - a.getI(), 2) + Math.pow(end.getJ() - a.getJ(), 2));
+    private int Zapolnenie(List<Point> points, int i) {
+        if (i == 0) {
+            list.get(Start.getI()).remove(Start.getJ());
+            list.get(Start.getI()).add(Start.getJ(), "0");
+            i++;
+        }
+        List<Point> secondPoints = new ArrayList<>();
+        for (int j = 0; j < points.size(); j++) {
+            secondPoints.addAll(CheckAllPoints(points.get(j)));
+        }
+        for (int j = 0; j < secondPoints.size(); j++) {
+            list.get(secondPoints.get(j).getI()).remove(secondPoints.get(j).getJ());
+            list.get(secondPoints.get(j).getI()).add(secondPoints.get(j).getJ(), "" + i + "");
+        }
+        Show();
+        if (list.get(End.getI()).get(End.getJ()).equals(" "))
+            Zapolnenie(secondPoints, ++i);
+        return 1;
+    }
+
+    public void Zapoln(List<Point> points, int i){
+        while (list.get(End.getI()).get(End.getJ()).equals(" ")){
+            if (i == 0) {
+                list.get(Start.getI()).remove(Start.getJ());
+                list.get(Start.getI()).add(Start.getJ(), "0");
+                i++;
+            }
+            List<Point> secondPoints = new ArrayList<>();
+            for (int j = 0; j < points.size(); j++) {
+                secondPoints.addAll(CheckAllPoints(points.get(j)));
+            }
+            for (int j = 0; j < secondPoints.size(); j++) {
+                list.get(secondPoints.get(j).getI()).remove(secondPoints.get(j).getJ());
+                list.get(secondPoints.get(j).getI()).add(secondPoints.get(j).getJ(), "" + i + "");
+            }
+            i++;
+            points = secondPoints;
+        }
+    }
+
+    private Way wayReconstruction() {
+        Way way = new Way();
+        way.add(End);
+        SpPoint = End;
+        int EndNumber = Integer.parseInt(list.get(End.getI()).get(End.getJ())) - 1;
+        for (int i = EndNumber; i >= 0; i--) {
+            way.add(findPoint(i));
+        }
+        return way;
+    }
+
+    private Point findPoint(int i) {
+        List<Point> points = new ArrayList<>();
+        for (int j = 0; j < list.size(); j++) {
+            for (int k = 0; k < list.get(j).size(); k++) {
+                if (list.get(j).get(k).equals("" + i + "") && h(new Point(j,k),SpPoint) == 1)
+                    points.add(new Point(j, k));
+            }
+        }
+        points.sort((o1, o2) -> {if (h(o1,Start) < h(o2,Start)) return -1; return 1;});
+        Point point = points.get(0);
+        SpPoint = point;
+        return point;
+    }
+
+    public double h(Point a, Point b) {
+        double length = Math.sqrt(Math.pow(b.getI() - a.getI(), 2) + Math.pow(b.getJ() - a.getJ(), 2));
         return length;
     }
 
-    public Way Obhod(Point start, Way way) {
-        way.add(start);
-        if (way.isInWay(End)) {
-            FullWays.add(way);
-            return way;
-        }
-
-        List<Point> points = CheckAllWays(start, way);
-        points.sort(new Comparator<Point>() {
-            @Override
-            public int compare(Point o1, Point o2) {
-                if (h(o1, End) < h(o2, End))
-                    return -1;
-                return 1;
-            }
-        });
-        for (int i = 0; i < points.size(); i++) {
-            if (Crosses.size() > 24) {
-                list.get(points.get(i).getI()).remove(points.get(i).getJ());
-                list.get(points.get(i).getI()).add(points.get(i).getJ(), '0');
-            }
-            Obhod(points.get(i), way.clone());
-        }
-
-        return new Way();
-    }
-
-    private List<Point> CheckAllWays(Point point, Way way) {
-        List<Point> list1 = new ArrayList<>();
-        if (CheckUp(point.getI(), point.getJ()) && !CheckPointInWay(way, new Point(point.getI() - 1, point.getJ()))) {
-            if (!list.get(point.getI() - 1).get(point.getJ()).equals('0'))
-                list1.add(new Point(point.getI() - 1, point.getJ()));
-        }
-        if (CheckDown(point.getI(), point.getJ()) && !CheckPointInWay(way, new Point(point.getI() + 1, point.getJ()))) {
-            if (!list.get(point.getI() + 1).get(point.getJ()).equals('0'))
-                list1.add(new Point(point.getI() + 1, point.getJ()));
-        }
-        if (CheckRight(point.getI(), point.getJ()) && !CheckPointInWay(way, new Point(point.getI(), point.getJ() + 1))) {
-            if (!list.get(point.getI()).get(point.getJ() + 1).equals('0'))
-                list1.add(new Point(point.getI(), point.getJ() + 1));
-        }
-        if (CheckLeft(point.getI(), point.getJ()) && !CheckPointInWay(way, new Point(point.getI(), point.getJ() - 1))) {
-            if (!list.get(point.getI()).get(point.getJ() - 1).equals('0'))
-                list1.add(new Point(point.getI(), point.getJ() - 1));
-        }
-        return list1;
-    }
-
-    private Way CheckMinimalWay() {
-        Way min = FullWays.get(0);
-        for (int i = 1; i < FullWays.size(); i++) {
-            if (min.length > FullWays.get(i).length)
-                min = FullWays.get(i);
-        }
-        return min;
+    private List<Point> CheckAllPoints(Point start) {
+        List<Point> list = new ArrayList<>();
+        if (CheckUp(start.getI(), start.getJ())) list.add(new Point(start.getI() - 1, start.getJ()));
+        if (CheckDown(start.getI(), start.getJ())) list.add(new Point(start.getI() + 1, start.getJ()));
+        if (CheckLeft(start.getI(), start.getJ())) list.add(new Point(start.getI(), start.getJ() - 1));
+        if (CheckRight(start.getI(), start.getJ())) list.add(new Point(start.getI(), start.getJ() + 1));
+        return list;
     }
 
     private boolean CheckUp(int i, int j) {
-        if (i - 1 < 0) return false;
-        if (!list.get(i - 1).get(j).equals('*') && i - 1 >= 0) {
-            return true;
-        } else return false;
+        return (i >= 1)
+                && (!list.get(i - 1).get(j).equals("*"))
+                && (list.get(i - 1).get(j).equals(" "));
     }
 
     private boolean CheckDown(int i, int j) {
-        if (i + 1 > list.size()) return false;
-        if (!list.get(i + 1).get(j).equals('*') && i + 1 < list.size()) {
-            return true;
-        } else return false;
+        return (i <= list.size() - 2)
+                && (!list.get(i + 1).get(j).equals("*"))
+                && (list.get(i + 1).get(j).equals(" "));
     }
 
     private boolean CheckLeft(int i, int j) {
-        if (j - 1 < 0) return false;
-        if (!list.get(i).get(j - 1).equals('*') && j - 1 >= 0) {
-            return true;
-        } else return false;
+        return (j >= 1)
+                && (!list.get(i).get(j - 1).equals("*"))
+                && (list.get(i).get(j - 1).equals(" "));
     }
 
     private boolean CheckRight(int i, int j) {
-        if (j + 1 > list.get(i).size()) return false;
-        if (!list.get(i).get(j + 1).equals('*') && j + 1 < list.get(i).size()) {
-            return true;
-        } else return false;
-    }
-
-    private static boolean CheckPointInWay(Way way, Point point) {
-        if (way.isInWay(point)) {
-            return true;
-        }
-        return false;
+        return (j <= list.get(i).size() - 2)
+                && (!list.get(i).get(j + 1).equals("*"))
+                && (list.get(i).get(j + 1).equals(" "));
     }
 
     public void fill1(Way way) {
-        int k = 1;
-        int ind = 1;
+        for (int i = 0; i < list.size(); i++) {
+            for (int j = 0; j < list.get(i).size(); j++) {
+                if (!list.get(i).get(j).equals("*") && !list.get(i).get(j).equals(" ")){
+                    list.get(i).remove(j);
+                    list.get(i).add(j," ");
+                }
+            }
+        }
         for (int i = 0; i < way.length; i++) {
             list.get(way.getList().get(i).getI()).remove(way.getList().get(i).getJ());
-            String s = "" + k;
-            list.get(way.getList().get(i).getI()).add(way.getList().get(i).getJ(),s.charAt(0));
-            k += ind;
-            if (k == 9) ind = -1;
-            if (k == 1) ind = 1;
-        }
-    }
-
-    private void ShowCrossings() {
-        for (int i = 0; i < list.size(); i++) {
-            for (int j = 0; j < list.get(i).size() - 1; j++) {
-                if (new Point(i, j).isInList(Crosses))
-                    System.out.print('+');
-                else
-                    System.out.print(list.get(i).get(j));
-            }
-            if (new Point(i, list.get(i).size() - 1).isInList(Crosses))
-                System.out.println('+');
-            else
-                System.out.println(list.get(i).get(list.get(i).size() - 1));
+            list.get(way.getList().get(i).getI()).add(way.getList().get(i).getJ(), "1");
         }
     }
 
