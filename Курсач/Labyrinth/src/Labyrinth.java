@@ -42,7 +42,7 @@ public class Labyrinth {
     public void findAWayOut() {
         List<Point> points = new ArrayList<>();
         points.add(Start);
-        Zapoln(points, 0);
+        Zapoln(points, 1);
         Way bestWay = wayReconstruction();
         System.out.println("Кратчайший путь :");
         bestWay.Show();
@@ -51,12 +51,10 @@ public class Labyrinth {
     }
 
     public void Zapoln(List<Point> points, int i) {
+        list.get(Start.getI()).remove(Start.getJ());
+        list.get(Start.getI()).add(Start.getJ(), "0");
+
         while (list.get(End.getI()).get(End.getJ()).equals(" ")) {
-            if (i == 0) {
-                list.get(Start.getI()).remove(Start.getJ());
-                list.get(Start.getI()).add(Start.getJ(), "0");
-                i++;
-            }
             List<Point> secondPoints = new ArrayList<>();
             for (int j = 0; j < points.size(); j++) {
                 List<Point> pointList = CheckAllPoints(points.get(j));
