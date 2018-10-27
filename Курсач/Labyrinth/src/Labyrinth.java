@@ -42,9 +42,7 @@ public class Labyrinth {
     public void findAWayOut() {
         List<Point> points = new ArrayList<>();
         points.add(Start);
-//        Zapolnenie(points, 0);
-        Zapoln(points,0);
-        Show();
+        Zapoln(points, 0);
         Way bestWay = wayReconstruction();
         System.out.println("Кратчайший путь :");
         bestWay.Show();
@@ -52,8 +50,8 @@ public class Labyrinth {
         Show();
     }
 
-    public void Zapoln(List<Point> points, int i){
-        while (list.get(End.getI()).get(End.getJ()).equals(" ")){
+    public void Zapoln(List<Point> points, int i) {
+        while (list.get(End.getI()).get(End.getJ()).equals(" ")) {
             if (i == 0) {
                 list.get(Start.getI()).remove(Start.getJ());
                 list.get(Start.getI()).add(Start.getJ(), "0");
@@ -87,11 +85,14 @@ public class Labyrinth {
         List<Point> points = new ArrayList<>();
         for (int j = 0; j < list.size(); j++) {
             for (int k = 0; k < list.get(j).size(); k++) {
-                if (list.get(j).get(k).equals("" + i + "") && h(new Point(j,k),SpPoint) == 1)
+                if (list.get(j).get(k).equals("" + i + "") && h(new Point(j, k), SpPoint) == 1)
                     points.add(new Point(j, k));
             }
         }
-        points.sort((o1, o2) -> {if (h(o1,Start) < h(o2,Start)) return -1; return 1;});
+        points.sort((o1, o2) -> {
+            if (h(o1, Start) < h(o2, Start)) return -1;
+            return 1;
+        });
         Point point = points.get(0);
         SpPoint = point;
         return point;
@@ -138,9 +139,9 @@ public class Labyrinth {
     public void fill1(Way way) {
         for (int i = 0; i < list.size(); i++) {
             for (int j = 0; j < list.get(i).size(); j++) {
-                if (!list.get(i).get(j).equals("*") && !list.get(i).get(j).equals(" ")){
+                if (!list.get(i).get(j).equals("*") && !list.get(i).get(j).equals(" ")) {
                     list.get(i).remove(j);
-                    list.get(i).add(j," ");
+                    list.get(i).add(j, " ");
                 }
             }
         }
