@@ -51,21 +51,19 @@ public class Labyrinth {
     }
 
     public void Zapoln(List<Point> points, int i) {
-        list.get(Start.getI()).remove(Start.getJ());
-        list.get(Start.getI()).add(Start.getJ(), "0");
+        list.get(Start.getI()).set(Start.getJ(), "0");
 
         while (list.get(End.getI()).get(End.getJ()).equals(" ")) {
             List<Point> secondPoints = new ArrayList<>();
             for (int j = 0; j < points.size(); j++) {
-                List<Point> pointList = CheckAllPoints(points.get(j));
+                List<Point> pointList = CheckAllPoints(points.get(j), " ");
                 for (int k = 0; k < pointList.size(); k++) {
                     if (!secondPoints.contains(pointList.get(k)))
                         secondPoints.add(pointList.get(k));
                 }
             }
             for (int j = 0; j < secondPoints.size(); j++) {
-                list.get(secondPoints.get(j).getI()).remove(secondPoints.get(j).getJ());
-                list.get(secondPoints.get(j).getI()).add(secondPoints.get(j).getJ(), "" + i + "");
+                list.get(secondPoints.get(j).getI()).set(secondPoints.get(j).getJ(), "" + i + "");
             }
             i++;
             points = secondPoints;
@@ -78,26 +76,19 @@ public class Labyrinth {
         SpPoint = End;
         int EndNumber = Integer.parseInt(list.get(End.getI()).get(End.getJ())) - 1;
         for (int i = EndNumber; i >= 0; i--) {
-            way.add(findPoint(i));
+            way.add(findingPoint(SpPoint, i));
         }
         return way;
     }
 
-    private Point findPoint(int i) {
-        List<Point> points = new ArrayList<>();
-        for (int j = 0; j < list.size(); j++) {
-            for (int k = 0; k < list.get(j).size(); k++) {
-                if (list.get(j).get(k).equals("" + i + "") && h(new Point(j, k), SpPoint) == 1)
-                    points.add(new Point(j, k));
-            }
-        }
+    private Point findingPoint(Point start, int number) {
+        List<Point> points = CheckAllPoints(start, "" + number + "");
         points.sort((o1, o2) -> {
             if (h(o1, Start) < h(o2, Start)) return -1;
             return 1;
         });
-        Point point = points.get(0);
-        SpPoint = point;
-        return point;
+        SpPoint = points.get(0);
+        return SpPoint;
     }
 
     private double h(Point a, Point b) {
@@ -105,51 +96,49 @@ public class Labyrinth {
         return length;
     }
 
-    private List<Point> CheckAllPoints(Point start) {
+    private List<Point> CheckAllPoints(Point start, String s) {
         List<Point> list = new ArrayList<>();
-        if (CheckUp(start.getI(), start.getJ())) list.add(new Point(start.getI() - 1, start.getJ()));
-        if (CheckDown(start.getI(), start.getJ())) list.add(new Point(start.getI() + 1, start.getJ()));
-        if (CheckLeft(start.getI(), start.getJ())) list.add(new Point(start.getI(), start.getJ() - 1));
-        if (CheckRight(start.getI(), start.getJ())) list.add(new Point(start.getI(), start.getJ() + 1));
+        if (CheckUp(start.getI(), start.getJ(), s)) list.add(new Point(start.getI() - 1, start.getJ()));
+        if (CheckDown(start.getI(), start.getJ(), s)) list.add(new Point(start.getI() + 1, start.getJ()));
+        if (CheckLeft(start.getI(), start.getJ(), s)) list.add(new Point(start.getI(), start.getJ() - 1));
+        if (CheckRight(start.getI(), start.getJ(), s)) list.add(new Point(start.getI(), start.getJ() + 1));
         return list;
     }
 
-    private boolean CheckUp(int i, int j) {
+    private boolean CheckUp(int i, int j, String s) {
         return (i >= 1)
                 && (!list.get(i - 1).get(j).equals("*"))
-                && (list.get(i - 1).get(j).equals(" "));
+                && (list.get(i - 1).get(j).equals(s));
     }
 
-    private boolean CheckDown(int i, int j) {
+    private boolean CheckDown(int i, int j, String s) {
         return (i <= list.size() - 2)
                 && (!list.get(i + 1).get(j).equals("*"))
-                && (list.get(i + 1).get(j).equals(" "));
+                && (list.get(i + 1).get(j).equals(s));
     }
 
-    private boolean CheckLeft(int i, int j) {
+    private boolean CheckLeft(int i, int j, String s) {
         return (j >= 1)
                 && (!list.get(i).get(j - 1).equals("*"))
-                && (list.get(i).get(j - 1).equals(" "));
+                && (list.get(i).get(j - 1).equals(s));
     }
 
-    private boolean CheckRight(int i, int j) {
+    private boolean CheckRight(int i, int j, String s) {
         return (j <= list.get(i).size() - 2)
                 && (!list.get(i).get(j + 1).equals("*"))
-                && (list.get(i).get(j + 1).equals(" "));
+                && (list.get(i).get(j + 1).equals(s));
     }
 
-    public void fill1(Way way) {
+    private void fill1(Way way) {
         for (int i = 0; i < list.size(); i++) {
             for (int j = 0; j < list.get(i).size(); j++) {
                 if (!list.get(i).get(j).equals("*") && !list.get(i).get(j).equals(" ")) {
-                    list.get(i).remove(j);
-                    list.get(i).add(j, " ");
+                    list.get(i).set(j, " ");
                 }
             }
         }
         for (int i = 0; i < way.length; i++) {
-            list.get(way.getList().get(i).getI()).remove(way.getList().get(i).getJ());
-            list.get(way.getList().get(i).getI()).add(way.getList().get(i).getJ(), "1");
+            list.get(way.getList().get(i).getI()).set(way.getList().get(i).getJ(), "1");
         }
     }
 
@@ -157,10 +146,7 @@ public class Labyrinth {
         System.out.println("Лабиринт :");
         for (int i = 0; i < list.size(); i++) {
             for (int j = 0; j < list.get(i).size() - 1; j++) {
-                if (list.get(i).get(j).equals('0')) {
-                    System.out.print(' ');
-                } else
-                    System.out.print(list.get(i).get(j));
+                System.out.print(list.get(i).get(j));
             }
             System.out.println(list.get(i).get(list.get(i).size() - 1));
         }

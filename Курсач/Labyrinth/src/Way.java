@@ -19,9 +19,7 @@ public class Way {
     }
 
     public void Show() {
-        for (int i = 0; i < list.size(); i++) {
-            list.get(i).Show();
-        }
+        list.forEach(Point::Show);
         System.out.println("Длина = " + length);
     }
 }
