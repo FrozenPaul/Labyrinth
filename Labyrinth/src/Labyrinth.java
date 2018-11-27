@@ -14,7 +14,7 @@ public class Labyrinth {
         Point[] StartAndEnd = labyrinthParser.findingStartAndEnd(list);
         Start = StartAndEnd[0];
         End = StartAndEnd[1];
-        System.out.println(this.toString());
+        System.out.println(this);
         System.out.println(Start);
         System.out.println(End);
     }
